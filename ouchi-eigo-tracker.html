@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おうち英語タイマー</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root{
+    --primary:#FF5B9F;
+    --primary-dark:#E6417C;
+    --secondary:#7FD0F0;
+    --accent-yellow:#FFD93D;
+    --accent-green:#6BCB77;
+    --accent-orange:#FF9F45;
+    --bg:#EEF7FC;
+    --card:#FFFFFF;
+    --text:#2D3561;
+    --text-light:#7A8299;
+    --border:#E3EFF7;
+    --shadow:0 4px 14px rgba(255,91,159,.10);
+    --shadow-lg:0 8px 24px rgba(255,91,159,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    background:linear-gradient(135deg,#EEF7FC 0%,#FCE8F2 100%);
+    color:var(--text);min-height:100vh;padding:20px;
+  }
+  .container{max-width:1100px;margin:0 auto}
+
+  /* Header */
+  .header{text-align:center;margin-bottom:28px;padding:24px;background:var(--card);border-radius:24px;box-shadow:var(--shadow)}
+  .header h1{font-size:28px;color:var(--primary);margin-bottom:4px}
+  .header .sub{color:var(--text-light);font-size:14px}
+  .today-total{margin-top:14px;display:inline-block;padding:10px 24px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:999px;font-weight:700;font-size:18px;box-shadow:var(--shadow)}
+
+  /* Cards */
+  .card{background:var(--card);border-radius:20px;padding:22px;box-shadow:var(--shadow);margin-bottom:20px}
+  .card h2{font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text)}
+  .card h2 .icon{font-size:22px}
+
+  /* Stopwatch */
+  .stopwatch{background:linear-gradient(135deg,#FDF0F6 0%,#E8F4FB 100%)}
+  .sw-display{font-size:48px;font-weight:700;text-align:center;color:var(--primary-dark);letter-spacing:2px;margin:10px 0 16px;font-variant-numeric:tabular-nums}
+  .sw-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+  .cat-select{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+  .cat-chip{padding:8px 16px;border:2px solid var(--border);background:#fff;border-radius:999px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-light);transition:all .2s}
+  .cat-chip:hover{border-color:var(--primary)}
+  .cat-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:var(--shadow)}
+
+  /* Buttons */
+  .btn{padding:12px 22px;border:none;border-radius:999px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+  .btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow)}
+  .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+  .btn-secondary{background:var(--secondary);color:var(--text)}
+  .btn-secondary:hover{background:#F5B820}
+  .btn-ghost{background:#fff;color:var(--text);border:2px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .btn-danger{background:#fff;color:#E53935;border:2px solid #FFCDD2}
+  .btn-danger:hover{background:#FFEBEE}
+  .btn-sm{padding:6px 14px;font-size:13px}
+
+  /* Manual input */
+  .manual-form{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:10px;align-items:end}
+  .manual-form label{font-size:12px;color:var(--text-light);font-weight:600;margin-bottom:4px;display:block}
+  .input,.select{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:#fff;color:var(--text)}
+  .input:focus,.select:focus{outline:none;border-color:var(--primary)}
+  @media(max-width:720px){.manual-form{grid-template-columns:1fr 1fr;gap:10px}.manual-form .btn{grid-column:1/-1}}
+
+  /* Dashboard grid */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:720px){.grid-2{grid-template-columns:1fr}}
+
+  /* Today summary */
+  .today-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+  .stat{padding:14px;border-radius:14px;text-align:center}
+  .stat .label{font-size:12px;color:var(--text-light);font-weight:600}
+  .stat .value{font-size:22px;font-weight:700;margin-top:4px}
+
+  /* Period selector */
+  .period-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;background:#FFF5EB;padding:6px;border-radius:14px}
+  .period-tab{flex:1;min-width:70px;padding:10px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-weight:700;color:var(--text-light);font-family:inherit;transition:all .2s;font-size:13px}
+  .period-tab.active{background:var(--primary);color:#fff;box-shadow:var(--shadow)}
+
+  /* Chart container */
+  .chart-box{position:relative;height:300px}
+
+  /* History */
+  .history-list{max-height:340px;overflow-y:auto}
+  .history-item{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border)}
+  .history-item:last-child{border-bottom:none}
+  .history-badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+  .history-info{flex:1;min-width:0}
+  .history-date{font-size:12px;color:var(--text-light)}
+  .history-note{font-size:13px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .history-mins{font-weight:700;color:var(--primary-dark)}
+  .del-btn{background:none;border:none;color:#E53935;cursor:pointer;font-size:16px;padding:4px;opacity:.5}
+  .del-btn:hover{opacity:1}
+
+  /* Empty state */
+  .empty{text-align:center;padding:40px 20px;color:var(--text-light)}
+  .empty .emoji{font-size:48px;margin-bottom:10px}
+
+  /* Footer actions */
+  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+  /* Category colors as CSS vars for JS */
+  .cat-kakenagashi{background:#FFE3EF;color:#D63384}
+  .cat-todo{background:#FFF4CC;color:#B88A00}
+  .cat-youtube{background:#FFDED1;color:#D9531E}
+  .cat-other{background:#D6EEFC;color:#1E88C7}
+
+  /* Goal */
+  .goal-bar{height:14px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:10px}
+  .goal-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent-yellow));transition:width .4s;border-radius:999px}
+  .goal-label{display:flex;justify-content:space-between;font-size:13px;margin-top:6px;color:var(--text-light)}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:12px 24px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .3s;z-index:100;font-size:14px}
+  .toast.show{opacity:1}
+
+  /* Child selector */
+  .child-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;justify-content:center}
+  .child-chip{padding:6px 14px;border:2px solid var(--border);background:#fff;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-light);transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+  .child-chip:hover{border-color:var(--primary)}
+  .child-chip.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:var(--shadow)}
+  .child-chip.manage{background:#FFF5FA;color:var(--primary);border-color:var(--primary);border-style:dashed}
+
+  /* Streak badge */
+  .streak{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:6px 14px;background:linear-gradient(135deg,#FF9F45,#FFD93D);color:#fff;border-radius:999px;font-weight:700;font-size:14px;box-shadow:var(--shadow);vertical-align:middle}
+  .streak-inline{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--accent-orange);font-weight:700;margin-left:8px}
+
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(45,53,97,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:20px;padding:24px;max-width:420px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+  .modal h3{font-size:18px;margin-bottom:14px;color:var(--primary)}
+  .child-row{display:flex;gap:8px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;background:#FAFBFF}
+  .child-row input{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit}
+  .child-row .emoji-btn{background:#fff;border:1px solid var(--border);border-radius:8px;padding:4px 8px;cursor:pointer;font-size:16px;width:40px}
+  .child-row .del-child{background:none;border:none;color:#E53935;cursor:pointer;font-size:14px;padding:4px}
+
+  /* Share card (hidden, rendered when saving image) */
+  .share-card{position:fixed;left:-9999px;top:0;width:540px;background:linear-gradient(135deg,#FFF5FA 0%,#E8F4FB 100%);padding:30px;border-radius:24px;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;color:var(--text)}
+  .share-card .sc-head{text-align:center;margin-bottom:20px}
+  .share-card .sc-title{font-size:22px;color:var(--primary);font-weight:700}
+  .share-card .sc-date{font-size:13px;color:var(--text-light);margin-top:4px}
+  .share-card .sc-child{font-size:15px;font-weight:600;margin-top:6px}
+  .share-card .sc-total{text-align:center;padding:20px;background:#fff;border-radius:16px;margin-bottom:16px;box-shadow:0 2px 8px rgba(255,91,159,.1)}
+  .share-card .sc-total-label{font-size:13px;color:var(--text-light)}
+  .share-card .sc-total-val{font-size:36px;font-weight:700;color:var(--primary);margin-top:4px}
+  .share-card .sc-streak{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:4px 12px;background:linear-gradient(135deg,#FF9F45,#FFD93D);color:#fff;border-radius:999px;font-weight:700;font-size:13px}
+  .share-card .sc-cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .share-card .sc-cat{background:#fff;padding:12px;border-radius:12px;text-align:center}
+  .share-card .sc-cat-label{font-size:11px;color:var(--text-light);font-weight:600}
+  .share-card .sc-cat-val{font-size:18px;font-weight:700;margin-top:2px}
+  .share-card .sc-footer{text-align:center;margin-top:16px;font-size:11px;color:var(--text-light)}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <h1>おうち英語タイマー</h1>
+    <div class="sub">今日もちょっとずつ、英語の時間♪</div>
+    <div style="margin-top:14px">
+      <span class="today-total" id="todayTotal">今日の合計：0分</span>
+      <span class="streak" id="streakBadge" style="display:none">🔥 <span id="streakDays">0</span>日連続</span>
+    </div>
+    <div class="child-bar" id="childBar"></div>
+  </header>
+
+  <!-- Child management modal -->
+  <div class="modal-bg" id="childModal">
+    <div class="modal">
+      <h3>👨‍👩‍👧‍👦 お子さん管理</h3>
+      <div id="childEditList"></div>
+      <button class="btn btn-ghost btn-sm" id="addChildBtn" style="width:100%;margin-top:6px">＋ お子さんを追加</button>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" id="closeChildModal">閉じる</button>
+        <button class="btn btn-primary btn-sm" id="saveChildren">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share card (hidden, rendered for image export) -->
+  <div class="share-card" id="shareCard">
+    <div class="sc-head">
+      <div class="sc-title" id="scTitle">週間のおうち英語</div>
+      <div class="sc-date" id="scDate"></div>
+      <div class="sc-child" id="scChild"></div>
+    </div>
+    <div class="sc-total">
+      <div class="sc-total-label">週間の合計</div>
+      <div class="sc-total-val" id="scTotal">0分</div>
+      <div id="scStreakWrap"></div>
+    </div>
+    <div class="sc-cats" id="scCats"></div>
+    <div class="sc-footer">おうち英語タイマー 🌱</div>
+  </div>
+
+  <!-- Stopwatch -->
+  <div class="card stopwatch">
+    <h2><span class="icon">⏱️</span>ストップウォッチ</h2>
+    <div class="cat-select" id="swCats"></div>
+    <div class="sw-display" id="swDisplay">00:00:00</div>
+    <div class="sw-controls">
+      <button class="btn btn-primary" id="swStart">▶ スタート</button>
+      <button class="btn btn-secondary" id="swStop" style="display:none">⏸ 一時停止</button>
+      <button class="btn btn-primary" id="swRecord" style="display:none">💾 この時間で記録</button>
+      <button class="btn btn-ghost" id="swReset" style="display:none">🔄 リセット</button>
+    </div>
+    <div id="swHint" style="display:none;text-align:center;margin-top:8px;font-size:12px;color:var(--text-light)">
+      一時停止中です。「再開」で続ける / 「記録」で保存 / 「リセット」で0に戻す
+    </div>
+  </div>
+
+  <!-- Manual entry -->
+  <div class="card">
+    <h2><span class="icon">✏️</span>手入力で記録</h2>
+    <form class="manual-form" id="manualForm">
+      <div>
+        <label>日付</label>
+        <input type="date" class="input" id="mDate" required>
+      </div>
+      <div>
+        <label>カテゴリ</label>
+        <select class="select" id="mCat" required></select>
+      </div>
+      <div>
+        <label>時間（分）＋メモ（任意）</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" class="input" id="mMin" min="1" max="1440" placeholder="30" style="width:90px" required>
+          <input type="text" class="input" id="mNote" placeholder="ピーパッピーシリーズ etc...">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">追加</button>
+    </form>
+  </div>
+
+  <!-- Today dashboard -->
+  <div class="grid-2">
+    <div class="card">
+      <h2><span class="icon">📊</span>今日のダッシュボード</h2>
+      <div class="today-stats" id="todayStats"></div>
+      <div class="chart-box" id="todayChartBox" style="height:240px"><canvas id="todayChart"></canvas></div>
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:14px">🎯 1日の目標</strong>
+          <input type="number" class="input" id="goalInput" min="0" max="600" style="width:100px;padding:6px 10px" placeholder="分">
+        </div>
+        <div class="goal-bar"><div class="goal-fill" id="goalFill" style="width:0%"></div></div>
+        <div class="goal-label"><span id="goalCurrent">0分</span><span id="goalTarget">目標なし</span></div>
+      </div>
+    </div>
+
+    <!-- Period chart -->
+    <div class="card">
+      <h2><span class="icon">📈</span>期間別グラフ</h2>
+      <div class="period-tabs" id="periodTabs">
+        <button class="period-tab active" data-period="week">週間</button>
+        <button class="period-tab" data-period="month">1ヶ月</button>
+        <button class="period-tab" data-period="3month">3ヶ月</button>
+        <button class="period-tab" data-period="year">年間</button>
+      </div>
+      <div id="weekNav" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px">
+        <button class="btn btn-ghost btn-sm" id="prevWeek">◀ 前の週</button>
+        <span id="weekRange" style="font-weight:700;font-size:13px;color:var(--text)"></span>
+        <button class="btn btn-ghost btn-sm" id="nextWeek">次の週 ▶</button>
+      </div>
+      <div class="chart-box"><canvas id="periodChart"></canvas></div>
+      <div id="periodSummary" style="margin-top:12px;text-align:center;color:var(--text-light);font-size:13px"></div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <h2><span class="icon">📝</span>記録履歴（最新30件）</h2>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card">
+    <h2><span class="icon">📥</span>データ管理・シェア</h2>
+    <div class="actions">
+      <button class="btn btn-primary" id="shareImage">📸 週間の成果を画像保存</button>
+      <button class="btn btn-ghost" id="exportCsv">📊 CSVダウンロード（全期間）</button>
+      <button class="btn btn-ghost" id="exportCsvRange">期間指定でCSV</button>
+      <button class="btn btn-ghost" id="backupJson">💾 バックアップ（JSON）</button>
+      <label class="btn btn-ghost" style="display:inline-block">
+        📂 復元（JSON）
+        <input type="file" accept=".json" id="restoreJson" style="display:none">
+      </label>
+      <button class="btn btn-danger" id="clearAll">🗑️ 全データ削除</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:var(--text-light);font-size:12px;margin-top:20px;padding:10px">
+    データはこのブラウザに自動保存されます 🌱
+  </div>
+
+  <!-- Brand Footer -->
+  <div style="margin-top:30px;padding:20px;background:linear-gradient(135deg,#FFF5FA 0%,#E8F4FB 100%);border-radius:20px;text-align:center">
+    <div style="font-size:13px;color:var(--text);font-weight:700;margin-bottom:6px">
+      🌱 このツールは「ツールラボ／ぽん」作成
+    </div>
+    <div style="font-size:12px;color:var(--text-light);line-height:1.7;margin-bottom:10px">
+      おうち英語コースの受講生として<br>
+      「本当に欲しかった」を形にしました。
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px">
+      コース運営者様向け<strong style="color:var(--primary)">カスタマイズ納品版</strong>もご用意しています
+    </div>
+    <a href="https://ouchi-eigo-tool-lab-pon.vercel.app" target="_blank" rel="noopener" style="display:inline-block;padding:8px 18px;background:var(--primary);color:#fff;border-radius:999px;text-decoration:none;font-size:12px;font-weight:700;margin:4px">
+      📄 詳細を見る
+    </a>
+    <a href="https://ig.me/m/ponmama76" target="_blank" rel="noopener" style="display:inline-block;padding:8px 18px;background:#fff;color:var(--primary);border:2px solid var(--primary);border-radius:999px;text-decoration:none;font-size:12px;font-weight:700;margin:4px">
+      💬 DMで相談 @ponmama76
+    </a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Data Layer
+========================================================= */
+const STORAGE_KEY = 'ouchi-eigo-tracker-v1';
+const CATEGORIES = [
+  { id:'kakenagashi', name:'掛け流し',   emoji:'🎵', color:'#FF5B9F' },
+  { id:'todo',        name:'トド英語',   emoji:'📱', color:'#FFD93D' },
+  { id:'youtube',     name:'YouTube',   emoji:'📺', color:'#FF7A45' },
+  { id:'other',       name:'その他',     emoji:'📚', color:'#5EC2E7' },
+];
+
+const DEFAULT_CHILD = { id:'default', name:'わが子', emoji:'🌱' };
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { entries:[], goal:60, children:[{...DEFAULT_CHILD}], activeChildId:'default' };
+    const d = JSON.parse(raw);
+    // Migration: old data without children
+    const children = (d.children && d.children.length) ? d.children : [{...DEFAULT_CHILD}];
+    const activeChildId = d.activeChildId || children[0].id;
+    const entries = (d.entries||[]).map(e => e.childId ? e : {...e, childId: children[0].id});
+    return { entries, goal: d.goal ?? 60, children, activeChildId };
+  }catch(e){ return { entries:[], goal:60, children:[{...DEFAULT_CHILD}], activeChildId:'default' }; }
+}
+function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+let data = loadData();
+
+/* =========================================================
+   Helpers
+========================================================= */
+const pad = n => String(n).padStart(2,'0');
+function localDateStr(d){
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function todayStr(){ return localDateStr(new Date()); }
+function fmtDuration(mins){
+  const h = Math.floor(mins/60), m = mins%60;
+  if(h===0) return `${m}分`;
+  return m===0 ? `${h}時間` : `${h}時間${m}分`;
+}
+function fmtDate(s){
+  const d = new Date(s);
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function catById(id){ return CATEGORIES.find(c=>c.id===id) || CATEGORIES[3]; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function childById(id){ return data.children.find(c=>c.id===id) || data.children[0]; }
+function activeChild(){ return childById(data.activeChildId); }
+function isAllView(){ return data.activeChildId === '__all__'; }
+function entriesForActive(){
+  return isAllView() ? data.entries : data.entries.filter(e=>e.childId===data.activeChildId);
+}
+
+/* Streak calc: consecutive days up to today (or yesterday) with at least 1 entry */
+function calcStreak(entries){
+  if(!entries.length) return 0;
+  const dateSet = new Set(entries.map(e=>e.date));
+  const today = new Date(); today.setHours(0,0,0,0);
+  let streak = 0;
+  // If today has no record, start counting from yesterday
+  let cursor = new Date(today);
+  if(!dateSet.has(localDateStr(cursor))){
+    cursor.setDate(cursor.getDate()-1);
+  }
+  while(dateSet.has(localDateStr(cursor))){
+    streak++;
+    cursor.setDate(cursor.getDate()-1);
+  }
+  return streak;
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* =========================================================
+   Entries
+========================================================= */
+function addEntry({date,category,minutes,note,childId}){
+  // If in "all" view, default to first child
+  const cid = childId || (isAllView() ? data.children[0].id : data.activeChildId);
+  data.entries.push({
+    id: uid(), childId: cid, date, category, minutes: Math.round(minutes),
+    note: note||'', createdAt: Date.now()
+  });
+  saveData(); renderAll();
+}
+function deleteEntry(id){
+  data.entries = data.entries.filter(e=>e.id!==id);
+  saveData(); renderAll();
+}
+
+/* =========================================================
+   Stopwatch
+========================================================= */
+const SW_KEY = 'ouchi-eigo-sw-v1';
+function loadSwState(){
+  try{
+    const raw = localStorage.getItem(SW_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveSwState(){
+  const { timer, ...persistable } = swState;
+  localStorage.setItem(SW_KEY, JSON.stringify(persistable));
+}
+function clearSwState(){ localStorage.removeItem(SW_KEY); }
+
+let swState = loadSwState() || { running:false, startAt:0, elapsed:0, cat:'kakenagashi' };
+swState.timer = null;
+
+function renderSwCats(){
+  const wrap = document.getElementById('swCats');
+  wrap.innerHTML = CATEGORIES.map(c=>
+    `<button class="cat-chip ${c.id===swState.cat?'active':''}" data-cat="${c.id}">${c.emoji} ${c.name}</button>`
+  ).join('');
+  wrap.querySelectorAll('.cat-chip').forEach(b=>{
+    b.onclick = ()=>{
+      if(swState.running){ toast('ストップしてから変更してね'); return; }
+      swState.cat = b.dataset.cat;
+      saveSwState();
+      renderSwCats();
+    };
+  });
+}
+function updateSwDisplay(){
+  const ms = swState.elapsed + (swState.running ? Date.now()-swState.startAt : 0);
+  const s = Math.floor(ms/1000);
+  document.getElementById('swDisplay').textContent =
+    `${pad(Math.floor(s/3600))}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}`;
+}
+function renderSwButtons(){
+  const start = document.getElementById('swStart');
+  const stop = document.getElementById('swStop');
+  const record = document.getElementById('swRecord');
+  const reset = document.getElementById('swReset');
+  const hint = document.getElementById('swHint');
+
+  const isPaused = !swState.running && swState.elapsed > 0;
+  const isRunning = swState.running;
+  const isInitial = !isRunning && !isPaused;
+
+  start.style.display = (isInitial || isPaused) ? 'inline-block' : 'none';
+  start.textContent = isPaused ? '▶ 再開' : '▶ スタート';
+  stop.style.display = isRunning ? 'inline-block' : 'none';
+  record.style.display = isPaused ? 'inline-block' : 'none';
+  reset.style.display = (isRunning || isPaused) ? 'inline-block' : 'none';
+  hint.style.display = isPaused ? 'block' : 'none';
+}
+
+function swStart(){
+  swState.running = true;
+  swState.startAt = Date.now();
+  swState.timer = setInterval(updateSwDisplay, 500);
+  saveSwState();
+  renderSwButtons();
+}
+function swStop(){
+  if(!swState.running) return;
+  swState.elapsed += Date.now() - swState.startAt;
+  swState.running = false;
+  clearInterval(swState.timer);
+  saveSwState();
+  updateSwDisplay();
+  renderSwButtons();
+}
+function swRecord(){
+  const mins = Math.max(1, Math.round(swState.elapsed/60000));
+  if(mins < 1){ toast('1分以上から記録できます'); return; }
+  addEntry({ date: todayStr(), category: swState.cat, minutes: mins, note:'' });
+  toast(`${fmtDuration(mins)}を記録したよ！`);
+  swReset();
+}
+function swReset(){
+  clearInterval(swState.timer);
+  swState = { ...swState, running:false, startAt:0, elapsed:0, timer:null };
+  clearSwState();
+  updateSwDisplay();
+  renderSwButtons();
+}
+document.getElementById('swStart').onclick = swStart;
+document.getElementById('swStop').onclick = swStop;
+document.getElementById('swRecord').onclick = swRecord;
+document.getElementById('swReset').onclick = ()=>{
+  if(confirm('リセットしますか？（記録されません）')) swReset();
+};
+
+/* =========================================================
+   Manual Form
+========================================================= */
+function renderManualCats(){
+  const sel = document.getElementById('mCat');
+  sel.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+}
+document.getElementById('manualForm').onsubmit = (e)=>{
+  e.preventDefault();
+  const date = document.getElementById('mDate').value;
+  const category = document.getElementById('mCat').value;
+  const minutes = parseInt(document.getElementById('mMin').value,10);
+  const note = document.getElementById('mNote').value.trim();
+  if(!date||!category||!minutes) return;
+  addEntry({date,category,minutes,note});
+  document.getElementById('mMin').value='';
+  document.getElementById('mNote').value='';
+  toast('記録しました！');
+};
+
+/* =========================================================
+   Today Dashboard
+========================================================= */
+let todayChart = null;
+function renderToday(){
+  const today = todayStr();
+  const scoped = entriesForActive();
+  const todays = scoped.filter(e=>e.date===today);
+  const total = todays.reduce((s,e)=>s+e.minutes,0);
+
+  document.getElementById('todayTotal').textContent = `今日の合計：${fmtDuration(total)}`;
+
+  // Streak
+  const streak = calcStreak(scoped);
+  const streakBadge = document.getElementById('streakBadge');
+  if(streak >= 2){
+    streakBadge.style.display='inline-flex';
+    document.getElementById('streakDays').textContent = streak;
+  } else {
+    streakBadge.style.display='none';
+  }
+
+  // Stats
+  const statsBox = document.getElementById('todayStats');
+  statsBox.innerHTML = CATEGORIES.map(c=>{
+    const mins = todays.filter(e=>e.category===c.id).reduce((s,e)=>s+e.minutes,0);
+    return `<div class="stat cat-${c.id}">
+      <div class="label">${c.emoji} ${c.name}</div>
+      <div class="value">${mins}<span style="font-size:13px;font-weight:500">分</span></div>
+    </div>`;
+  }).join('');
+
+  // Goal
+  const goal = data.goal||0;
+  const pct = goal>0 ? Math.min(100, (total/goal)*100) : 0;
+  document.getElementById('goalFill').style.width = pct+'%';
+  document.getElementById('goalCurrent').textContent = fmtDuration(total);
+  document.getElementById('goalTarget').textContent = goal>0 ? `目標：${fmtDuration(goal)}` : '目標なし';
+  document.getElementById('goalInput').value = goal||'';
+
+  // Pie chart
+  const labels = CATEGORIES.map(c=>c.name);
+  const values = CATEGORIES.map(c => todays.filter(e=>e.category===c.id).reduce((s,e)=>s+e.minutes,0));
+  const colors = CATEGORIES.map(c=>c.color);
+
+  if(todayChart) { todayChart.destroy(); todayChart = null; }
+  const chartBox = document.getElementById('todayChartBox');
+  if(total === 0){
+    chartBox.innerHTML = `<div class="empty"><div class="emoji">🌱</div>今日の記録はまだないよ</div>`;
+    return;
+  }
+  // Always reset to canvas so subsequent renders work
+  chartBox.innerHTML = '<canvas id="todayChart"></canvas>';
+  todayChart = new Chart(document.getElementById('todayChart'), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderWidth:3, borderColor:'#fff' }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:12,family:'inherit'}, padding:10 } },
+        tooltip:{ callbacks:{ label:(c)=>`${c.label}: ${fmtDuration(c.parsed)}` } }
+      },
+      cutout:'60%'
+    }
+  });
+}
+
+/* Goal input */
+document.getElementById('goalInput').onchange = (e)=>{
+  const v = parseInt(e.target.value,10);
+  data.goal = isNaN(v)||v<0 ? 0 : v;
+  saveData(); renderToday();
+};
+
+/* =========================================================
+   Period Chart
+========================================================= */
+let periodChart = null;
+let currentPeriod = 'week';
+let weekOffset = 0; // 0 = this week (Mon-Sun), -1 = last week, etc.
+
+/* Get the Monday of the current calendar week (based on offset) */
+function getWeekMonday(offset=0){
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  const day = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  const diffToMon = (day === 0 ? -6 : 1 - day); // how many days to subtract to get Monday
+  d.setDate(d.getDate() + diffToMon + (offset * 7));
+  return d;
+}
+
+function getPeriodBuckets(period){
+  // returns array of { label, start, end } in ascending date order
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const buckets = [];
+
+  if(period==='week'){
+    // Current calendar week (Monday to Sunday), with offset
+    const monday = getWeekMonday(weekOffset);
+    for(let i=0;i<7;i++){
+      const d = new Date(monday); d.setDate(monday.getDate()+i);
+      const s = localDateStr(d);
+      const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+      buckets.push({ label:`${d.getMonth()+1}/${d.getDate()}(${dow})`, start:s, end:s });
+    }
+  } else if(period==='month'){
+    for(let i=29;i>=0;i--){
+      const d = new Date(now); d.setDate(now.getDate()-i);
+      const s = localDateStr(d);
+      buckets.push({ label:`${d.getMonth()+1}/${d.getDate()}`, start:s, end:s });
+    }
+  } else if(period==='3month'){
+    // weekly buckets, 13 weeks
+    for(let i=12;i>=0;i--){
+      const end = new Date(now); end.setDate(now.getDate()-i*7);
+      const start = new Date(end); start.setDate(end.getDate()-6);
+      buckets.push({
+        label:`${start.getMonth()+1}/${start.getDate()}週`,
+        start:localDateStr(start),
+        end:localDateStr(end)
+      });
+    }
+  } else { // year - monthly
+    for(let i=11;i>=0;i--){
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const endD = new Date(now.getFullYear(), now.getMonth()-i+1, 0);
+      buckets.push({
+        label:`${d.getFullYear()}/${d.getMonth()+1}`,
+        start:localDateStr(d),
+        end:localDateStr(endD)
+      });
+    }
+  }
+  return buckets;
+}
+
+function renderPeriod(){
+  updateWeekNav();
+  const buckets = getPeriodBuckets(currentPeriod);
+  const scoped = entriesForActive();
+  // compute per bucket per category
+  const datasets = CATEGORIES.map(c=>({
+    label:`${c.emoji} ${c.name}`,
+    data: buckets.map(b =>
+      scoped
+        .filter(e => e.category===c.id && e.date>=b.start && e.date<=b.end)
+        .reduce((s,e)=>s+e.minutes,0)
+    ),
+    backgroundColor: c.color,
+    borderRadius: 6,
+    borderSkipped: false,
+  }));
+
+  if(periodChart) periodChart.destroy();
+  periodChart = new Chart(document.getElementById('periodChart'), {
+    type:'bar',
+    data:{ labels: buckets.map(b=>b.label), datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ stacked:true, ticks:{font:{size:10}} },
+        y:{ stacked:true, ticks:{ callback:v=>v+'分', font:{size:11} }, grid:{ color:'#FFE8D6' } }
+      },
+      plugins:{
+        legend:{ position:'bottom', labels:{ font:{size:11}, padding:8, boxWidth:12 } },
+        tooltip:{
+          callbacks:{
+            label:(c)=>`${c.dataset.label}: ${fmtDuration(c.parsed.y)}`,
+            footer:(items)=>{
+              const total = items.reduce((s,i)=>s+i.parsed.y,0);
+              return `合計: ${fmtDuration(total)}`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Summary
+  const allMins = datasets.reduce((s,ds)=>s+ds.data.reduce((a,b)=>a+b,0),0);
+  const days = buckets.length;
+  const avg = days>0 ? Math.round(allMins/days) : 0;
+  const unit = currentPeriod==='3month' ? '週' : (currentPeriod==='year' ? '月' : '日');
+  document.getElementById('periodSummary').textContent =
+    `合計：${fmtDuration(allMins)}　／　1${unit}あたり平均：${fmtDuration(avg)}`;
+}
+
+document.querySelectorAll('.period-tab').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.period-tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentPeriod = b.dataset.period;
+    weekOffset = 0; // reset when switching
+    renderPeriod();
+  };
+});
+
+/* Week navigation */
+function updateWeekNav(){
+  const nav = document.getElementById('weekNav');
+  if(currentPeriod !== 'week'){
+    nav.style.display = 'none';
+    return;
+  }
+  nav.style.display = 'flex';
+  const monday = getWeekMonday(weekOffset);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const label = `${monday.getMonth()+1}/${monday.getDate()} 〜 ${sunday.getMonth()+1}/${sunday.getDate()}`;
+  const offsetLabel = weekOffset === 0 ? '（今週）' : (weekOffset === -1 ? '（先週）' : `（${Math.abs(weekOffset)}週間前）`);
+  document.getElementById('weekRange').textContent = label + offsetLabel;
+  document.getElementById('nextWeek').disabled = (weekOffset >= 0);
+  document.getElementById('nextWeek').style.opacity = (weekOffset >= 0) ? '0.4' : '1';
+}
+document.getElementById('prevWeek').onclick = ()=>{ weekOffset--; renderPeriod(); };
+document.getElementById('nextWeek').onclick = ()=>{
+  if(weekOffset >= 0) return;
+  weekOffset++; renderPeriod();
+};
+
+/* =========================================================
+   History
+========================================================= */
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  const sorted = [...entriesForActive()].sort((a,b)=> b.date.localeCompare(a.date) || b.createdAt-a.createdAt);
+  if(sorted.length===0){
+    list.innerHTML = `<div class="empty"><div class="emoji">📝</div>まだ記録がありません<br><span style="font-size:12px">ストップウォッチか手入力で追加してね</span></div>`;
+    return;
+  }
+  list.innerHTML = sorted.slice(0,30).map(e=>{
+    const c = catById(e.category);
+    const ch = childById(e.childId);
+    const childTag = isAllView() ? `<span style="font-size:11px;color:var(--text-light);margin-right:6px">${ch.emoji}${ch.name}</span>` : '';
+    return `<div class="history-item">
+      <span class="history-badge cat-${c.id}">${c.emoji} ${c.name}</span>
+      <div class="history-info">
+        <div class="history-date">${childTag}${fmtDate(e.date)} (${e.date})</div>
+        ${e.note?`<div class="history-note">${escapeHtml(e.note)}</div>`:''}
+      </div>
+      <div class="history-mins">${fmtDuration(e.minutes)}</div>
+      <button class="del-btn" data-id="${e.id}" title="削除">✕</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.del-btn').forEach(b=>{
+    b.onclick = ()=>{
+      if(confirm('この記録を削除しますか？')) deleteEntry(b.dataset.id);
+    };
+  });
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+/* =========================================================
+   CSV / JSON Export
+========================================================= */
+function toCsv(entries){
+  const header = ['日付','カテゴリ','分','メモ'];
+  const rows = entries.map(e=>[e.date, catById(e.category).name, e.minutes, (e.note||'').replace(/"/g,'""')]);
+  const csv = [header, ...rows].map(r => r.map(v=>`"${v}"`).join(',')).join('\r\n');
+  return '\uFEFF' + csv; // BOM for Excel
+}
+function download(filename, content, type='text/csv;charset=utf-8'){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportCsv').onclick = ()=>{
+  if(data.entries.length===0){ toast('データがありません'); return; }
+  const sorted = [...data.entries].sort((a,b)=>a.date.localeCompare(b.date));
+  download(`ouchi-eigo_${todayStr()}.csv`, toCsv(sorted));
+  toast('CSVをダウンロードしたよ！');
+};
+
+document.getElementById('exportCsvRange').onclick = ()=>{
+  const from = prompt('開始日（例: 2026-01-01）', '2026-01-01');
+  if(!from) return;
+  const to = prompt('終了日（例: '+todayStr()+'）', todayStr());
+  if(!to) return;
+  const filtered = data.entries.filter(e=>e.date>=from && e.date<=to).sort((a,b)=>a.date.localeCompare(b.date));
+  if(filtered.length===0){ toast('該当データがありません'); return; }
+  download(`ouchi-eigo_${from}_${to}.csv`, toCsv(filtered));
+  toast(`${filtered.length}件をダウンロード！`);
+};
+
+document.getElementById('backupJson').onclick = ()=>{
+  download(`ouchi-eigo-backup_${todayStr()}.json`, JSON.stringify(data,null,2), 'application/json');
+  toast('バックアップ完了！');
+};
+
+document.getElementById('restoreJson').onchange = (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try{
+      const loaded = JSON.parse(ev.target.result);
+      if(!loaded.entries || !Array.isArray(loaded.entries)) throw new Error('invalid');
+      if(!confirm(`${loaded.entries.length}件の記録を復元しますか？現在のデータは上書きされます。`)) return;
+      data = { entries: loaded.entries, goal: loaded.goal ?? 60 };
+      saveData(); renderAll();
+      toast('復元完了！');
+    }catch(err){ alert('ファイルの読み込みに失敗しました'); }
+  };
+  r.readAsText(f);
+};
+
+document.getElementById('clearAll').onclick = ()=>{
+  if(!confirm('全データを削除しますか？\n（先にバックアップをおすすめ！）')) return;
+  if(!confirm('本当に削除しますか？この操作は取り消せません。')) return;
+  data = { entries:[], goal:60 };
+  saveData(); renderAll();
+  toast('全データを削除しました');
+};
+
+/* =========================================================
+   Init
+========================================================= */
+/* =========================================================
+   Children Management
+========================================================= */
+const EMOJI_POOL = ['🌱','🌟','🐻','🐰','🦊','🐼','🐯','🦁','🐶','🐱','🦄','🌸','🌻','⭐','🎀','🍀'];
+
+function renderChildBar(){
+  const bar = document.getElementById('childBar');
+  const chips = data.children.map(c=>
+    `<button class="child-chip ${c.id===data.activeChildId?'active':''}" data-cid="${c.id}">${c.emoji} ${c.name}</button>`
+  ).join('');
+  const allChip = data.children.length > 1
+    ? `<button class="child-chip ${isAllView()?'active':''}" data-cid="__all__">👨‍👩‍👧‍👦 全員</button>`
+    : '';
+  bar.innerHTML = chips + allChip + `<button class="child-chip manage" id="manageChildren">⚙️ 管理</button>`;
+  bar.querySelectorAll('.child-chip[data-cid]').forEach(b=>{
+    b.onclick = ()=>{
+      data.activeChildId = b.dataset.cid;
+      saveData(); renderChildBar(); renderAll();
+    };
+  });
+  document.getElementById('manageChildren').onclick = openChildModal;
+}
+
+function openChildModal(){
+  const list = document.getElementById('childEditList');
+  list.innerHTML = data.children.map((c,i)=>
+    `<div class="child-row" data-idx="${i}">
+      <button class="emoji-btn">${c.emoji}</button>
+      <input type="text" value="${escapeHtml(c.name)}" placeholder="お子さんの名前" maxlength="20">
+      <button class="del-child" title="削除" ${data.children.length<=1?'disabled style="opacity:.3"':''}>✕</button>
+    </div>`
+  ).join('');
+  list.querySelectorAll('.child-row').forEach(row=>{
+    const idx = parseInt(row.dataset.idx,10);
+    row.querySelector('.emoji-btn').onclick = (e)=>{
+      e.preventDefault();
+      const cur = data.children[idx].emoji;
+      const curIdx = EMOJI_POOL.indexOf(cur);
+      const next = EMOJI_POOL[(curIdx+1) % EMOJI_POOL.length];
+      data.children[idx].emoji = next;
+      row.querySelector('.emoji-btn').textContent = next;
+    };
+    row.querySelector('.del-child').onclick = ()=>{
+      if(data.children.length<=1) return;
+      if(confirm(`「${data.children[idx].name}」を削除しますか？\n（記録はそのまま残ります）`)){
+        data.children.splice(idx,1);
+        openChildModal();
+      }
+    };
+  });
+  document.getElementById('childModal').classList.add('show');
+}
+function closeChildModal(){ document.getElementById('childModal').classList.remove('show'); }
+
+document.getElementById('closeChildModal').onclick = closeChildModal;
+document.getElementById('addChildBtn').onclick = ()=>{
+  data.children.push({ id: uid(), name:'新しい子', emoji: EMOJI_POOL[data.children.length % EMOJI_POOL.length] });
+  openChildModal();
+};
+document.getElementById('saveChildren').onclick = ()=>{
+  document.querySelectorAll('#childEditList .child-row').forEach(row=>{
+    const idx = parseInt(row.dataset.idx,10);
+    const name = row.querySelector('input').value.trim() || '名無し';
+    if(data.children[idx]) data.children[idx].name = name;
+  });
+  // Ensure activeChildId still valid
+  if(!data.children.find(c=>c.id===data.activeChildId) && !isAllView()){
+    data.activeChildId = data.children[0].id;
+  }
+  saveData(); closeChildModal(); renderChildBar(); renderAll();
+  toast('保存しました！');
+};
+document.getElementById('childModal').onclick = (e)=>{
+  if(e.target.id==='childModal') closeChildModal();
+};
+
+/* =========================================================
+   Share Card (Image Export)
+========================================================= */
+document.getElementById('shareImage').onclick = async ()=>{
+  // Week range: the currently selected calendar week (Mon-Sun, based on weekOffset)
+  const weekStart = getWeekMonday(weekOffset);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate()+6);
+  const startStr = localDateStr(weekStart);
+  const endStr = localDateStr(weekEnd);
+
+  const scoped = entriesForActive();
+  const weeks = scoped.filter(e=>e.date>=startStr && e.date<=endStr);
+  const total = weeks.reduce((s,e)=>s+e.minutes,0);
+  const streak = calcStreak(scoped);
+  const daysRecorded = new Set(weeks.map(e=>e.date)).size;
+
+  const fmtYMD = d=>`${d.getMonth()+1}/${d.getDate()}`;
+  const weekLabel = weekOffset === 0 ? '今週' : (weekOffset === -1 ? '先週' : `${Math.abs(weekOffset)}週間前`);
+  document.getElementById('scTitle').textContent = `${weekLabel}のおうち英語`;
+  document.getElementById('scDate').textContent = `${fmtYMD(weekStart)}（月）〜 ${fmtYMD(weekEnd)}（日）／ ${daysRecorded}日間記録`;
+  document.getElementById('scChild').textContent = isAllView()
+    ? `👨‍👩‍👧‍👦 ご兄弟みんな`
+    : `${activeChild().emoji} ${activeChild().name}`;
+  document.getElementById('scTotal').textContent = fmtDuration(total);
+
+  document.getElementById('scStreakWrap').innerHTML = streak>=2
+    ? `<span class="sc-streak">🔥 ${streak}日連続</span>` : '';
+
+  document.getElementById('scCats').innerHTML = CATEGORIES.map(c=>{
+    const mins = weeks.filter(e=>e.category===c.id).reduce((s,e)=>s+e.minutes,0);
+    return `<div class="sc-cat" style="border-top:3px solid ${c.color}">
+      <div class="sc-cat-label">${c.emoji} ${c.name}</div>
+      <div class="sc-cat-val">${mins}<span style="font-size:12px;font-weight:500">分</span></div>
+    </div>`;
+  }).join('');
+
+  if(total===0 && !confirm('今週の記録がまだありません。空のカードを保存しますか？')) return;
+
+  toast('画像を生成中...');
+  const card = document.getElementById('shareCard');
+  try{
+    const canvas = await html2canvas(card, { backgroundColor:null, scale:2, logging:false });
+    canvas.toBlob(blob=>{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ouchi-eigo-week_${endStr}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('📸 画像を保存しました！');
+    });
+  }catch(err){
+    console.error(err);
+    alert('画像生成に失敗しました');
+  }
+};
+
+function renderAll(){
+  renderToday();
+  renderPeriod();
+  renderHistory();
+}
+
+document.getElementById('mDate').value = todayStr();
+renderChildBar();
+renderSwCats();
+renderManualCats();
+renderAll();
+updateSwDisplay();
+
+// Restore stopwatch if it was running when page closed
+if(swState.running){
+  swState.timer = setInterval(updateSwDisplay, 500);
+  toast('⏱️ タイマーが復元されました');
+}
+renderSwButtons();
+
+// Also save state when tab becomes hidden (extra safety on mobile)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && swState.running) saveSwState();
+});
+</script>
+</body>
+</html>
