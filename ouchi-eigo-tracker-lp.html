@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おうち英語タイマー｜コース導入のご提案</title>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --primary:#FF5B9F;
+    --primary-dark:#E6417C;
+    --secondary:#7FD0F0;
+    --accent-yellow:#FFD93D;
+    --accent-orange:#FF9F45;
+    --bg:#EEF7FC;
+    --card:#FFFFFF;
+    --text:#2D3561;
+    --text-light:#7A8299;
+    --border:#E3EFF7;
+    --shadow:0 4px 14px rgba(255,91,159,.10);
+    --shadow-lg:0 8px 30px rgba(255,91,159,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif;
+    background:linear-gradient(180deg,#EEF7FC 0%,#FCE8F2 100%);
+    color:var(--text);line-height:1.8;font-size:16px;
+  }
+  .container{max-width:720px;margin:0 auto;padding:0 20px}
+
+  /* Hero */
+  .hero{padding:60px 20px 40px;text-align:center;background:linear-gradient(135deg,#FFF5FA 0%,#E8F4FB 100%);border-radius:0 0 40px 40px;margin-bottom:40px}
+  .hero .eyebrow{display:inline-block;padding:6px 18px;background:#fff;color:var(--primary);font-weight:700;font-size:13px;border-radius:999px;box-shadow:var(--shadow);margin-bottom:16px}
+  .hero h1{font-size:32px;line-height:1.4;color:var(--text);margin-bottom:16px;font-weight:800}
+  .hero h1 .pink{color:var(--primary)}
+  .hero .sub{font-size:15px;color:var(--text-light);margin-bottom:28px;max-width:560px;margin-left:auto;margin-right:auto}
+  .hero .screenshot{max-width:100%;border-radius:20px;box-shadow:var(--shadow-lg);margin-top:20px}
+
+  /* Section */
+  section{margin-bottom:60px;padding:0 10px}
+  h2{font-size:24px;text-align:center;color:var(--text);margin-bottom:24px;line-height:1.5;font-weight:800}
+  h2 .pink{color:var(--primary)}
+  h2::after{content:"";display:block;width:40px;height:4px;background:linear-gradient(90deg,var(--primary),var(--accent-yellow));margin:10px auto 0;border-radius:2px}
+  h3{font-size:18px;color:var(--primary);margin-bottom:12px;font-weight:700}
+
+  p{margin-bottom:16px}
+  .lead{font-size:17px;text-align:center;max-width:580px;margin:0 auto 24px}
+
+  /* Cards */
+  .card{background:var(--card);border-radius:20px;padding:28px;box-shadow:var(--shadow);margin-bottom:20px}
+  .card-warm{background:linear-gradient(135deg,#FFF5FA 0%,#FFFBF0 100%)}
+  .card-cool{background:linear-gradient(135deg,#E8F4FB 0%,#F0F9FF 100%)}
+
+  /* Pain list */
+  .pain-list{list-style:none;padding:0}
+  .pain-list li{padding:14px 16px 14px 16px;background:#fff;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,.04);font-size:15px;display:flex;align-items:flex-start;gap:10px}
+  .pain-list li [data-lucide]{flex-shrink:0;margin-top:3px}
+
+  /* Feature */
+  .feature{display:flex;gap:16px;align-items:flex-start;padding:18px;background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .feature .fe-icon{font-size:32px;flex-shrink:0;width:52px;height:52px;background:linear-gradient(135deg,#FFF5FA,#E8F4FB);border-radius:12px;display:flex;align-items:center;justify-content:center}
+  .feature .fe-body h4{font-size:16px;font-weight:700;margin-bottom:4px;color:var(--text)}
+  .feature .fe-body p{font-size:14px;color:var(--text-light);margin:0;line-height:1.7}
+
+  /* Story */
+  .story-quote{font-size:16px;font-style:italic;color:var(--text-light);padding:20px;border-left:4px solid var(--primary);background:#FFF8FB;border-radius:0 12px 12px 0;margin:16px 0}
+
+  /* Compare Table */
+  .compare-wrap{overflow-x:auto;margin:20px 0 24px;border-radius:16px;box-shadow:var(--shadow);background:#fff}
+  .compare{width:100%;border-collapse:collapse;font-size:14px;min-width:540px}
+  .compare th,.compare td{padding:14px 12px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle}
+  .compare thead th{background:linear-gradient(135deg,#FFF5FA,#E8F4FB);font-weight:800;color:var(--text);position:sticky;top:0}
+  .compare thead th.rec{background:linear-gradient(135deg,var(--primary),var(--accent-orange));color:#fff}
+  .compare tbody th{background:#FAFBFF;text-align:left;font-weight:700;color:var(--text-light);font-size:13px;white-space:nowrap}
+  .compare tbody td.rec{background:#FFF5FA;font-weight:700}
+  .compare .price-cell{font-size:18px;font-weight:800;color:var(--primary)}
+  .compare .rec .price-cell{color:var(--primary-dark)}
+  .compare tr:last-child td,.compare tr:last-child th{border-bottom:none}
+  .compare .dash{color:var(--text-light);opacity:.5}
+  .compare-note{font-size:12px;color:var(--text-light);text-align:center;margin-top:-10px;margin-bottom:20px}
+
+  /* Pricing */
+  .pricing{display:grid;gap:16px;margin-top:24px}
+  .plan{background:#fff;border-radius:20px;padding:24px;box-shadow:var(--shadow);position:relative;border:3px solid transparent}
+  .plan.recommended{border-color:var(--primary);box-shadow:var(--shadow-lg)}
+  .plan .badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--primary),var(--accent-orange));color:#fff;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700}
+  .plan .plan-name{font-size:14px;color:var(--text-light);font-weight:700;letter-spacing:1px}
+  .plan .plan-title{font-size:20px;font-weight:800;margin:4px 0 8px}
+  .plan .plan-price{font-size:28px;font-weight:800;color:var(--primary);margin-bottom:16px}
+  .plan .plan-price small{font-size:13px;color:var(--text-light);font-weight:600}
+  .plan ul{list-style:none;padding:0}
+  .plan ul li{padding:8px 0 8px 24px;position:relative;font-size:14px;border-bottom:1px dashed var(--border)}
+  .plan ul li:last-child{border-bottom:none}
+  .plan ul li::before{content:"✓";position:absolute;left:0;color:var(--primary);font-weight:700}
+
+  /* CTA */
+  .cta{background:linear-gradient(135deg,var(--primary) 0%,var(--accent-orange) 100%);color:#fff;padding:40px 24px;border-radius:24px;text-align:center;margin:40px 0;box-shadow:var(--shadow-lg)}
+  .cta h2{color:#fff}
+  .cta h2::after{background:#fff}
+  .cta p{font-size:15px;opacity:.95;max-width:520px;margin-left:auto;margin-right:auto}
+  .cta-btn{display:inline-block;background:#fff;color:var(--primary);padding:16px 36px;border-radius:999px;font-weight:800;font-size:16px;text-decoration:none;margin-top:16px;box-shadow:0 4px 14px rgba(0,0,0,.15);transition:transform .2s}
+  .cta-btn:hover{transform:translateY(-2px)}
+
+  /* FAQ */
+  details{background:#fff;border-radius:14px;padding:16px 20px;margin-bottom:10px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+  details summary{font-weight:700;cursor:pointer;font-size:15px;color:var(--text);list-style:none;display:flex;justify-content:space-between;align-items:center}
+  details summary::after{content:"＋";color:var(--primary);font-size:20px;font-weight:400}
+  details[open] summary::after{content:"−"}
+  details p{margin-top:12px;font-size:14px;color:var(--text-light);line-height:1.7}
+
+  /* About me */
+  .about{background:linear-gradient(135deg,#FFF5FA 0%,#FFFBF0 100%);border-radius:20px;padding:28px;margin-bottom:20px}
+
+  /* Footer */
+  footer{text-align:center;padding:40px 20px;color:var(--text-light);font-size:12px}
+
+  /* Responsive */
+  @media(max-width:560px){
+    .hero{padding:40px 16px 28px}
+    .hero h1{font-size:26px}
+    h2{font-size:20px}
+    .card{padding:20px}
+    .plan{padding:20px}
+    .cta{padding:28px 20px}
+  }
+
+  /* Highlight */
+  .hl{background:linear-gradient(transparent 60%,#FFE899 60%);padding:0 2px;font-weight:700}
+  .tag{display:inline-block;padding:2px 8px;background:#FFF5FA;color:var(--primary);border-radius:6px;font-size:12px;font-weight:700;margin-right:6px}
+
+  /* Lucide Icons */
+  [data-lucide]{display:inline-block;vertical-align:-0.15em;stroke-width:2}
+  h3 [data-lucide]{width:20px;height:20px;margin-right:6px;color:var(--primary)}
+  .fe-icon [data-lucide]{width:28px;height:28px;color:var(--primary)}
+  .plan-name [data-lucide]{width:15px;height:15px;margin-right:4px;vertical-align:-0.2em}
+  .pain-list li [data-lucide]{width:18px;height:18px;color:var(--primary);margin-right:6px}
+  .lead [data-lucide]{width:18px;height:18px;color:var(--primary)}
+  summary [data-lucide]{width:18px;height:18px;margin-right:6px;color:var(--primary)}
+  .cta .cta-btn [data-lucide]{width:18px;height:18px;margin-right:6px}
+
+  /* App mockup in hero */
+  .mockup{margin:32px auto 0;max-width:380px;background:#fff;border-radius:24px;padding:20px;box-shadow:0 20px 50px rgba(255,91,159,.25);transform:rotate(-1deg);position:relative}
+  .mockup::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:60px;height:4px;background:#E3EFF7;border-radius:999px}
+  .mk-title{font-size:15px;font-weight:800;color:var(--primary);text-align:center}
+  .mk-sub{font-size:11px;color:var(--text-light);text-align:center;margin-top:2px}
+  .mk-badges{display:flex;gap:6px;justify-content:center;margin:10px 0}
+  .mk-total{display:inline-block;padding:5px 14px;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:999px;font-weight:700;font-size:12px}
+  .mk-streak{display:inline-flex;align-items:center;gap:3px;padding:5px 10px;background:linear-gradient(135deg,#FF9F45,#FFD93D);color:#fff;border-radius:999px;font-weight:700;font-size:12px}
+  .mk-children{display:flex;gap:4px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+  .mk-chip{padding:3px 10px;border:2px solid var(--border);background:#fff;border-radius:999px;font-size:11px;font-weight:700;color:var(--text-light)}
+  .mk-chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .mk-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+  .mk-stat{padding:8px;border-radius:10px;text-align:center}
+  .mk-stat .l{font-size:10px;font-weight:700;opacity:.8}
+  .mk-stat .v{font-size:15px;font-weight:800;margin-top:2px}
+  .mk-donut{width:130px;height:130px;border-radius:50%;margin:0 auto;background:conic-gradient(#FF5B9F 0 40%,#FFD93D 40% 65%,#FF7A45 65% 85%,#5EC2E7 85% 100%);display:flex;align-items:center;justify-content:center;position:relative}
+  .mk-donut::before{content:"";width:80px;height:80px;background:#fff;border-radius:50%;position:absolute}
+  .mk-donut span{position:relative;font-size:18px;font-weight:800;color:var(--primary)}
+  .mk-donut span small{display:block;font-size:9px;color:var(--text-light);font-weight:600}
+  .mk-goal{margin-top:14px}
+  .mk-goal-bar{height:8px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:4px}
+  .mk-goal-fill{height:100%;width:75%;background:linear-gradient(90deg,var(--primary),var(--accent-yellow));border-radius:999px}
+  .mk-goal-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-light);margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="eyebrow">ツールラボ／ぽん｜おうち英語コース向け・導入パートナー募集</div>
+    <h1>
+      受講生の<span class="pink">「続けられません…」</span><br>
+      そろそろ、道具で解決しませんか？
+    </h1>
+    <p class="sub">
+      おうち英語コース受講中のママが「これがずっと欲しかった」と作った、<br>
+      時間記録・可視化・習慣化のためのツール。<br>
+      あなたのコースにそのまま組み込める、カスタマイズ付き納品プラン。
+    </p>
+
+    <div class="mockup">
+      <div class="mk-title">おうち英語タイマー</div>
+      <div class="mk-sub">今日もちょっとずつ、英語の時間♪</div>
+      <div class="mk-badges">
+        <span class="mk-total">今日の合計：45分</span>
+        <span class="mk-streak">🔥 5日連続</span>
+      </div>
+      <div class="mk-children">
+        <span class="mk-chip on">🌱 長男</span>
+        <span class="mk-chip">🌟 次男</span>
+        <span class="mk-chip">🎀 三男</span>
+        <span class="mk-chip">👨‍👩‍👧‍👦 全員</span>
+      </div>
+      <div class="mk-donut"><span>45<small>分</small></span></div>
+      <div class="mk-stats">
+        <div class="mk-stat" style="background:#FFE3EF;color:#D63384"><div class="l">🎵 掛け流し</div><div class="v">18分</div></div>
+        <div class="mk-stat" style="background:#FFF4CC;color:#B88A00"><div class="l">📱 トド英語</div><div class="v">12分</div></div>
+        <div class="mk-stat" style="background:#FFDED1;color:#D9531E"><div class="l">📺 YouTube</div><div class="v">10分</div></div>
+        <div class="mk-stat" style="background:#D6EEFC;color:#1E88C7"><div class="l">📚 その他</div><div class="v">5分</div></div>
+      </div>
+      <div class="mk-goal">
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700">
+          <span>🎯 1日の目標</span><span style="color:var(--primary)">60分</span>
+        </div>
+        <div class="mk-goal-bar"><div class="mk-goal-fill"></div></div>
+        <div class="mk-goal-labels"><span>45分</span><span>あと15分！</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PAIN -->
+  <section>
+    <h2>こんな悩み、ありませんか？</h2>
+    <ul class="pain-list">
+      <li><i data-lucide="alert-circle"></i><span>「続けたいのに、気づいたら3日空いてた」って生徒さんから毎週聞く</span></li>
+      <li><i data-lucide="alert-circle"></i><span>成果を数字で見せられないから、継続のモチベを保つのが難しい</span></li>
+      <li><i data-lucide="alert-circle"></i><span>コース卒業後、生徒さんとの接点が切れてリピートに繋がらない</span></li>
+      <li><i data-lucide="alert-circle"></i><span>「他のコースと何が違うの？」に、明確に答えづらい</span></li>
+      <li><i data-lucide="alert-circle"></i><span>毎回Excelやノートで記録させるけど、みんな3日坊主で終わる</span></li>
+      <li><i data-lucide="alert-circle"></i><span>SNSで生徒さんの成果を発信してもらいたいけど、映える素材がない</span></li>
+    </ul>
+    <p class="lead" style="margin-top:20px">
+      どれか一つでも頷いたなら、続きを読んでください。
+    </p>
+  </section>
+
+  <!-- SOLUTION -->
+  <section>
+    <h2>そこで、作りました。<br><span class="pink">「おうち英語タイマー」</span></h2>
+    <p class="lead">
+      ストップウォッチ／手入力／お子さん複数人管理／期間別グラフ／画像シェア／CSV出力。<br>
+      <span class="hl">おうち英語を頑張るママに必要な機能を、ぜんぶ一枚のブラウザアプリに</span>。
+    </p>
+
+    <div class="card card-warm">
+      <h3><i data-lucide="target"></i>生徒さんが「今日もやろう」と思える仕組み</h3>
+      <p>
+        連続記録（ストリーク）機能で、<span class="hl">「○日連続がんばってる！」</span>の達成感を毎日。<br>
+        カテゴリ別の円グラフで、掛け流し・トド英語・YouTube・その他を色分け可視化。<br>
+        毎週の頑張りを<span class="hl">画像1枚で保存・シェア</span>できるから、SNS投稿がラクになる。
+      </p>
+    </div>
+
+    <div class="card card-cool">
+      <h3><i data-lucide="trending-up"></i>コンサルとしての「成果」を見せられる</h3>
+      <p>
+        週間／1ヶ月／3ヶ月／年間のグラフで、<span class="hl">受講前→受講後の変化を数字で提示</span>できる。<br>
+        CSV出力で、面談前にデータを一括確認。<br>
+        お子さん複数人管理で、きょうだい割引の提案など<span class="hl">商品設計の幅が広がる</span>。
+      </p>
+    </div>
+  </section>
+
+  <!-- WHY ME -->
+  <section>
+    <h2>なぜ、おうち英語コース受講中の<br>私が作ったか</h2>
+
+    <div class="about">
+      <p>
+        はじめまして、<strong>ツールラボ／ぽん</strong>と申します。<br>
+        うちの3人の子供のママ、SNSで発信しながらワーママやってます。<br>
+        <span style="font-size:13px;color:var(--text-light)">ワーママの「地味にしんどい」を解決するツールを作る屋号で活動中。</span>
+      </p>
+      <p>
+        じつは私、今も<span class="hl">おうち英語コースの受講生</span>です。自分の子たちのために、毎日ちょっとずつ英語を取り入れる日々。
+      </p>
+      <p>
+        でも、ずっとモヤモヤしてたんです。
+      </p>
+
+      <div class="story-quote">
+        「今日、何分やったっけ？」<br>
+        「先週よりちょっとは増えてる？」<br>
+        「上の子はがんばってるけど、下の子は全然記録してない気がする…」<br>
+        —— そういうの、全部頭の中で管理してて、疲れた。
+      </div>
+
+      <p>
+        Excelで管理しようとしたけど、3日で飽きた。<br>
+        紙のシールにも手を出したけど、うちの3人の子供分となると、もう無理。
+      </p>
+      <p>
+        <span class="hl">私みたいな「続けたいけど続けられない」受講生、たぶん全国にいっぱいいる。</span><br>
+        コンサルをしている方なら、たぶん毎週、同じ相談を受けていると思います。
+      </p>
+      <p>
+        だから、<span class="hl">お客さん側の視点で「本当に欲しかったもの」だけ詰め込んで</span>作りました。
+      </p>
+      <p>
+        でも私が提供できるのは、ツール単体じゃなくて<br>
+        <strong>「お客さん目線を知っている私が、あなたのコース専用にカスタマイズ・アップデート・動線づくりまで一緒にやる」</strong><br>
+        ——この<span class="pink">丸ごとパートナーシップ</span>です。
+      </p>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section>
+    <h2>搭載機能</h2>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="clock"></i></div>
+      <div class="fe-body">
+        <h4>ストップウォッチ＆手入力</h4>
+        <p>掛け流し中にスマホで別アプリを使っても、ブラウザを再起動しても、タイマーは続きます。過去日付の遡り入力もOK。</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="users"></i></div>
+      <div class="fe-body">
+        <h4>お子さん複数人管理</h4>
+        <p>何人でも追加OK。ダッシュボード・グラフ・履歴をお子さん別に切替。「全員」ビューで合算表示もできます。</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="flame"></i></div>
+      <div class="fe-body">
+        <h4>連続記録（ストリーク）</h4>
+        <p>「○日連続がんばってる」を自動カウント＆ヘッダーに表示。継続の達成感がモチベーション維持に直結します。</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="camera"></i></div>
+      <div class="fe-body">
+        <h4>今週の成果を画像保存</h4>
+        <p>ワンタップで1週間の頑張りを、ピンク×水色の可愛いカード画像に。LINE・Threads・Instagramにそのまま貼れます。</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="trending-up"></i></div>
+      <div class="fe-body">
+        <h4>期間別グラフ</h4>
+        <p>週間／1ヶ月／3ヶ月／年間を切替可能。積み上げ棒グラフでカテゴリ別の内訳が一目でわかります。</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="fe-icon"><i data-lucide="bar-chart-3"></i></div>
+      <div class="fe-body">
+        <h4>CSV／JSON出力</h4>
+        <p>全期間または期間指定でCSVダウンロード。データは全てブラウザに自動保存。JSONバックアップ＆復元もワンタップ。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section>
+    <h2>導入すると、<br>コンサル側はこう変わります</h2>
+    <p class="lead">
+      このツールが解決するのは、<span class="hl">生徒さんの悩み</span>だけじゃありません。<br>
+      日々の運営で「地味にしんどい」作業が、ごっそり消えます。
+    </p>
+
+    <div class="card">
+      <h3><i data-lucide="clipboard-check"></i>進捗アンケート、もう要りません</h3>
+      <p>
+        「今週どれくらいやりました？」って毎回聞かなくていい。<br>
+        <span class="hl">CSVを見れば、誰が・何を・どれだけやってるか一目でわかります</span>。生徒さんの負担も、あなたの集計の手間も、ゼロに。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="clock"></i>面談の準備時間、ゼロに</h3>
+      <p>
+        面談前に「この子、どんな状況だっけ？」と確認する時間、もう不要。<br>
+        ツールの画面を一緒に見ながら話せば、<span class="hl">そのまま具体的なアドバイスに入れます</span>。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="trending-up"></i>ビフォーアフターが、数字で語れる</h3>
+      <p>
+        「受講前と受講後でこんなに変わりました」が、<span class="hl">グラフ1枚で証明</span>できる。<br>
+        新規の体験会・セミナーで見せるだけで、申し込みの説得力が段違いに上がります。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="megaphone"></i>口コミが、勝手に生まれる</h3>
+      <p>
+        生徒さんが週次の成果を画像でシェア → 友達ママが「なにこれ可愛い！」→ <span class="hl">あなたのコースに問い合わせ</span>。<br>
+        発信の得意な生徒さんは、自然とあなたの広告塔になってくれます。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="mail"></i>卒業後も、関係が切れない</h3>
+      <p>
+        コース卒業後もツールを使い続けてもらえるから、<span class="hl">自然な接点が残り続ける</span>。<br>
+        次の商品提案・継続講座・紹介案件に繋げやすくなります。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="circle-dollar-sign"></i>コース価格を、上げる根拠になる</h3>
+      <p>
+        「ツール＋カスタマイズ＋継続サポート込み」の商品設計にすれば、<span class="hl">コース価格を2〜3万円アップできる余地</span>が生まれます。1件の導入で、すぐ元が取れる計算です。
+      </p>
+    </div>
+
+    <div class="card">
+      <h3><i data-lucide="gift"></i>コースの特典として配布</h3>
+      <p>
+        「受講生限定ツール」として申込み特典に組み込む。<br>
+        他コースとの差別化ポイントが明確になり、<span class="hl">受講率UPに直結</span>します。
+      </p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section>
+    <h2>料金プラン</h2>
+    <p class="lead">
+      すべて<span class="hl">買い切り価格</span>（初回のみ）。<br>
+      3つのプランから、あなたのコースに合わせて選べます。
+    </p>
+
+    <!-- Flow Diagram: お金の流れ -->
+    <div style="background:linear-gradient(135deg,#FFF5FA 0%,#E8F4FB 100%);border-radius:20px;padding:24px;margin:20px 0">
+      <div style="text-align:center;font-size:14px;color:var(--text-light);margin-bottom:16px;font-weight:700">💡 料金の全体像（3ステップ）</div>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch">
+        <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.04)">
+          <div style="width:32px;height:32px;background:var(--primary);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:8px">1</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">導入時（1回だけ）</div>
+          <div style="font-size:13px;color:var(--text-light)">¥19,800〜¥98,000から<br>プランを選ぶ</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--primary)">→</div>
+        <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.04)">
+          <div style="width:32px;height:32px;background:var(--secondary);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:8px">2</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">保証期間中</div>
+          <div style="font-size:13px;color:var(--text-light)">3ヶ月〜1年<br><strong>修正・相談すべて無料</strong></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--primary)">→</div>
+        <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.04)">
+          <div style="width:32px;height:32px;background:var(--accent-orange);color:#fff;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:8px">3</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">保証後（任意）</div>
+          <div style="font-size:13px;color:var(--text-light)">月¥5,000 or 都度¥5,000〜<br>どちらか選ぶ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <h3 style="font-size:16px;margin:24px 0 8px;text-align:center;color:var(--text)">📊 3プラン比較表</h3>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th style="width:120px"></th>
+            <th>モニター</th>
+            <th class="rec">スタンダード<br><span style="font-size:11px;font-weight:600">⭐ おすすめ</span></th>
+            <th>プレミアム</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>価格</th>
+            <td class="price-cell">¥19,800</td>
+            <td class="rec price-cell">¥49,800</td>
+            <td class="price-cell">¥98,000</td>
+          </tr>
+          <tr>
+            <th>こんな人向け</th>
+            <td>まず試したい</td>
+            <td class="rec">本気で使いたい</td>
+            <td>仕組みから変えたい</td>
+          </tr>
+          <tr>
+            <th>デザインカスタム</th>
+            <td>ロゴ1箇所</td>
+            <td class="rec">フル<br><span style="font-size:11px;color:var(--text-light)">ロゴ・カラー・画像</span></td>
+            <td>フル</td>
+          </tr>
+          <tr>
+            <th>アップデート保証</th>
+            <td>3ヶ月</td>
+            <td class="rec">3ヶ月</td>
+            <td><strong>1年</strong></td>
+          </tr>
+          <tr>
+            <th>保証中の修正<br><span style="font-size:10px;font-weight:500">軽微な修正・機能調整</span></th>
+            <td>バグ対応のみ</td>
+            <td class="rec"><strong>5回まで無料</strong></td>
+            <td>無制限</td>
+          </tr>
+          <tr>
+            <th>LINEサポート</th>
+            <td>1ヶ月</td>
+            <td class="rec">3ヶ月</td>
+            <td>6ヶ月</td>
+          </tr>
+          <tr>
+            <th>動線設計セッション</th>
+            <td><span class="dash">―</span></td>
+            <td class="rec"><span class="dash">―</span></td>
+            <td><strong>3回（各60分）</strong></td>
+          </tr>
+          <tr>
+            <th>新機能の追加</th>
+            <td><span class="dash">―</span></td>
+            <td class="rec"><span class="dash">―</span></td>
+            <td><strong>3件込み</strong></td>
+          </tr>
+          <tr>
+            <th>その他</th>
+            <td style="font-size:12px;color:var(--text-light)">導入事例の<br>公開に協力</td>
+            <td class="rec"><span class="dash">―</span></td>
+            <td><span class="dash">―</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="compare-note">※ 下のカードで各プランの詳細をご確認いただけます</p>
+
+    <div class="pricing">
+      <div class="plan">
+        <div class="plan-name"><i data-lucide="ticket"></i>モニター</div>
+        <div class="plan-title">まず試したい人へ</div>
+        <div class="plan-price">¥19,800 <small>（先着2名限定）</small></div>
+        <ul>
+          <li>ツール納品＋ロゴ差し替え（1箇所）</li>
+          <li>3ヶ月のアップデート保証</li>
+          <li>1ヶ月のLINEサポート</li>
+          <li style="font-size:12px;color:var(--text-light)">※ 導入事例の公開にご協力いただきます</li>
+        </ul>
+      </div>
+
+      <div class="plan recommended">
+        <div class="badge">おすすめ</div>
+        <div class="plan-name"><i data-lucide="gift"></i>スタンダード</div>
+        <div class="plan-title">本気で使いたい人へ</div>
+        <div class="plan-price">¥49,800</div>
+        <ul>
+          <li>ツール納品＋<strong>フルデザインカスタム</strong><br><span style="font-size:12px;color:var(--text-light)">（ロゴ・カラー・ヘッダー画像）</span></li>
+          <li>3ヶ月のアップデート保証</li>
+          <li><strong>軽微な修正・機能調整 5回まで無料</strong><br><span style="font-size:12px;color:var(--text-light)">（新機能追加は別）</span></li>
+          <li>3ヶ月のLINEサポート</li>
+        </ul>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name"><i data-lucide="crown"></i>プレミアム</div>
+        <div class="plan-title">仕組みから変えたい人へ</div>
+        <div class="plan-price">¥98,000</div>
+        <ul>
+          <li>スタンダードの内容すべて</li>
+          <li><strong>1年間のアップデート保証</strong></li>
+          <li><strong>動線設計セッション 3回</strong>（各60分）</li>
+          <li><strong>新機能の追加 3件込み</strong></li>
+          <li>6ヶ月のLINEサポート</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- POST-WARRANTY PRICING -->
+  <section>
+    <h2>保証期間外のアップデートについて</h2>
+    <p class="lead">
+      納品後に追加修正やカスタマイズが必要になった場合、<br>
+      <span class="hl">「月額保守」または「都度料金」</span>のどちらかを選べます。
+    </p>
+
+    <!-- 月額保守プラン -->
+    <div class="card" style="border:3px solid var(--primary);position:relative">
+      <div style="position:absolute;top:-12px;left:20px;background:linear-gradient(135deg,var(--primary),var(--accent-orange));color:#fff;padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700">継続利用におすすめ</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <i data-lucide="shield-check" style="width:22px;height:22px;color:var(--primary)"></i>
+        <h3 style="margin:0;color:var(--text)">月額保守プラン</h3>
+        <span style="margin-left:auto;font-size:24px;font-weight:800;color:var(--primary)">¥5,000<span style="font-size:13px;color:var(--text-light)">／月</span></span>
+      </div>
+      <ul style="list-style:none;padding:0;margin:0;font-size:14px">
+        <li style="padding:6px 0 6px 24px;position:relative"><span style="position:absolute;left:0;color:var(--primary);font-weight:700">✓</span>軽微な修正 <strong>1回／月</strong>（翌月に繰越OK・最大3ヶ月分）</li>
+        <li style="padding:6px 0 6px 24px;position:relative"><span style="position:absolute;left:0;color:var(--primary);font-weight:700">✓</span>バグ修正 <strong>無制限・優先対応</strong></li>
+        <li style="padding:6px 0 6px 24px;position:relative"><span style="position:absolute;left:0;color:var(--primary);font-weight:700">✓</span>LINE優先サポート（24時間以内目安）</li>
+        <li style="padding:6px 0 6px 24px;position:relative"><span style="position:absolute;left:0;color:var(--primary);font-weight:700">✓</span>ブラウザアップデート対応</li>
+      </ul>
+      <p style="margin:10px 0 0;font-size:12px;color:var(--text-light)">
+        ※ 最低3ヶ月〜／いつでも解約OK<br>
+        ※ 月1回×12ヶ月＝ <strong>年間¥60,000</strong>で、軽微な修正12回分込み。都度¥5,000×12＝¥60,000と同額ですが、バグ修正無制限・優先対応が追加で付きます。
+      </p>
+    </div>
+
+    <!-- 都度料金 -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <i data-lucide="coins" style="width:22px;height:22px;color:var(--primary)"></i>
+        <h3 style="margin:0;color:var(--text)">都度料金</h3>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:12px 20px;align-items:center">
+        <div>
+          <strong>軽微な修正</strong><br>
+          <span style="font-size:13px;color:var(--text-light)">文言変更・色調整・ロゴ差替え等</span>
+        </div>
+        <div style="font-size:20px;font-weight:800;color:var(--primary);white-space:nowrap">¥5,000／件</div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          <strong>機能の調整</strong><br>
+          <span style="font-size:13px;color:var(--text-light)">カテゴリ追加・UI変更等</span>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px;font-size:20px;font-weight:800;color:var(--primary);white-space:nowrap">¥15,000／件</div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px">
+          <strong>新機能の追加</strong><br>
+          <span style="font-size:13px;color:var(--text-light)">新画面・外部連携等（要相談）</span>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:12px;font-size:20px;font-weight:800;color:var(--primary);white-space:nowrap">¥30,000〜／件</div>
+      </div>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,#FFF5FA 0%,#FFFBF0 100%);text-align:center">
+      <p style="margin:0;font-size:15px">
+        <strong>💡 バグ修正は、保証期間・プランに関係なく<span class="hl">いつでも無料</span>で対応します。</strong><br>
+        <span style="font-size:13px;color:var(--text-light)">「買った後どうなるか」の不安を、料金で見える化しました。</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- PREMIUM DETAIL -->
+  <section>
+    <h2><i data-lucide="crown" style="width:24px;height:24px;color:var(--primary);vertical-align:-0.2em"></i> プレミアムの中身<br><span style="font-size:15px;color:var(--text-light);font-weight:600">動線設計セッション 3回で、<br>何をやるか</span></h2>
+
+    <p class="lead">
+      「ツールを納品しただけ」で終わらせません。<br>
+      <span class="hl">あなたのコースに溶け込ませるところまで、一緒に設計します</span>。
+    </p>
+
+    <div class="card card-warm">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="flex-shrink:0;width:48px;height:48px;background:var(--primary);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">1</div>
+        <div>
+          <h3 style="margin-bottom:6px">現状ヒアリング＆導入ポイント設計</h3>
+          <p style="font-size:14px;color:var(--text-light);margin-bottom:10px">
+            あなたのコース内容・生徒さんの現状をヒアリングし、<strong>「いつ・どうツールを配るか」</strong>を一緒に決めます。
+          </p>
+          <div style="font-size:13px;color:var(--text)">
+            <strong>📦 納品物：</strong>導入フローチャート／配布アナウンス文（LINE用・メール用の2パターン）
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-cool">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="flex-shrink:0;width:48px;height:48px;background:var(--secondary);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">2</div>
+        <div>
+          <h3 style="margin-bottom:6px">活用ルーティン設計＆SNS連携</h3>
+          <p style="font-size:14px;color:var(--text-light);margin-bottom:10px">
+            生徒さんの<strong>週次ルーティン</strong>を設計し、<strong>自然な口コミ拡散</strong>の仕組みまで作ります。
+          </p>
+          <div style="font-size:13px;color:var(--text)">
+            <strong>📦 納品物：</strong>週次ルーティンシート／シェア促進テンプレ（生徒向け）／SNS投稿テンプレ3本（コンサル向け）
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warm">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="flex-shrink:0;width:48px;height:48px;background:var(--accent-orange);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">3</div>
+        <div>
+          <h3 style="margin-bottom:6px">継続・卒業後フォロー設計</h3>
+          <p style="font-size:14px;color:var(--text-light);margin-bottom:10px">
+            月次レビュー方法、卒業後の接点維持、<strong>次の商品への繋ぎ方</strong>まで設計。リピート・紹介の導線を作ります。
+          </p>
+          <div style="font-size:13px;color:var(--text)">
+            <strong>📦 納品物：</strong>月次レビューシート／卒業生フォロープラン／アップセル導線チャート
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,#FFF5FA 0%,#FFFBF0 100%);text-align:center">
+      <p style="font-size:14px;margin:0">
+        💡 <strong>3回の伴走後も、6ヶ月のLINEサポート付き。</strong><br>
+        <span style="font-size:13px;color:var(--text-light)">実装中の悩み・運用の相談、いつでも投げてください。</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <h2>よくあるご質問</h2>
+
+    <details>
+      <summary>他のコンサルさんにも同じツールを売りますか？</summary>
+      <p>
+        はい、基本的には同じツールをベースに提供しますが、<strong>ロゴ・カラー・ヘッダー画像のカスタマイズで「あなたのコース専用ツール」に見える</strong>よう納品します。プレミアムプランでは独自機能の追加もご相談可能です。完全独占が必要な場合は別途ご相談ください。
+      </p>
+    </details>
+
+    <details>
+      <summary>生徒さんへの配布方法は？</summary>
+      <p>
+        HTMLファイル1枚で納品するため、<strong>LINEやメールで配布するだけ</strong>。生徒さんはブラウザで開いてブックマークするだけで使えます。アプリストア登録やサーバー準備は不要です。
+      </p>
+    </details>
+
+    <details>
+      <summary>データはどこに保存されますか？</summary>
+      <p>
+        各生徒さんの<strong>ブラウザに自動保存</strong>されます。外部サーバーにデータは送信されないため、個人情報の取り扱いを心配する必要がありません。JSONバックアップ機能で本人がデータを保存・復元できます。
+      </p>
+    </details>
+
+    <details>
+      <summary>納品までの期間は？</summary>
+      <p>
+        スタンダードプランで<strong>約1〜2週間</strong>です。初回ヒアリング→デザイン確認→納品の流れ。プレミアムプランは動線設計を含むため、3〜4週間ほど見ておいてください。
+      </p>
+    </details>
+
+    <details>
+      <summary>アップデート保証とは何ですか？</summary>
+      <p>
+        モニター・スタンダードプランは納品後<strong>3ヶ月間</strong>、プレミアムプランは<strong>1年間</strong>、バグ修正・軽微な機能追加を無償対応します。ブラウザのアップデートに伴う調整なども含まれます。
+      </p>
+    </details>
+
+    <details>
+      <summary>保証期間が終わった後はどうなりますか？</summary>
+      <p>
+        保証期間終了後は、<strong>「月額保守プラン（¥5,000／月）」</strong>または<strong>「都度料金」</strong>のどちらかを選べます。継続的に小さな調整をしたい方には月額プラン（軽微な修正1回／月・バグ修正無制限）、たまにしか必要ない方には都度料金（¥5,000〜／件）がおすすめです。バグ修正はどちらの場合もいつでも無料対応します。
+      </p>
+    </details>
+
+    <details>
+      <summary>カスタマイズはどの範囲まで可能ですか？</summary>
+      <p>
+        スタンダードプランでは、<strong>ロゴ・カラー・ヘッダー画像・カテゴリ名</strong>の変更が可能です。プレミアムプランではこれに加えて、機能追加（例：独自のメッセージ機能、レポート自動送信など）のご相談が可能です。「こんなことできる？」という要望はお気軽にどうぞ。
+      </p>
+    </details>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2 style="color:#fff">まずは30分、<br>お話しませんか？</h2>
+    <p>
+      あなたのコースの現状をヒアリングした上で、どのプランがフィットするか、<br>
+      導入したらどんな変化が起こるかを一緒に考えます。<br><br>
+      営業色なし・無理な提案なし。<br>
+      <strong>「私も受講生だったときに欲しかったツールだから、いい形で届けたい」</strong>——これが私のスタンスです。
+    </p>
+    <a href="https://ig.me/m/ponmama76" class="cta-btn" id="ctaBtn" target="_blank" rel="noopener"><i data-lucide="instagram"></i>InstagramでDM相談する</a>
+    <p style="font-size:13px;margin-top:16px;opacity:.9">
+      @ponmama76 までお気軽にDMください 🌱
+    </p>
+  </div>
+
+  <section>
+    <div class="card" style="text-align:center;background:linear-gradient(135deg,#FFF5FA,#E8F4FB)">
+      <h3 style="color:var(--text);font-size:16px;margin-bottom:12px">✍️ 最後に、ひとこと</h3>
+      <p style="font-size:14px;line-height:1.9">
+        このツール、<span class="hl">私自身が一番のヘビーユーザー</span>です。<br>
+        うちの3人の子供それぞれの英語時間を、毎日コレで記録してます。<br>
+        だから、使ってもらって「ここ使いにくい」と言われたら、<br>
+        <strong>自分のためにも絶対アップデートします。</strong><br>
+        そういう意味で、このツールは<br>
+        私とあなたのコースの生徒さんの、<br>
+        <span class="pink"><strong>「同じ船に乗る」関係</strong></span>でもあります。<br><br>
+        よろしくお願いします。<br>
+        <strong>ぽん</strong>
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  © おうち英語タイマー｜ツールラボ／ぽん<br>
+  このページは個別ご提案用です
+</footer>
+
+<script>
+  if (window.lucide) lucide.createIcons();
+</script>
+</body>
+</html>
